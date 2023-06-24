@@ -50,7 +50,7 @@ local function loadResourceConfig()
         end
 
         local result = fn()
-
+		
         return result
     end
 
@@ -95,3 +95,12 @@ core = setmetatable({
 	__call = call,
 })
 
+if not IsDuplicityVersion() then
+    local resource = core.resource
+    RegisterNetEvent(('%s:client:contextLib:triggerFunction'):format(resource))
+    AddEventHandler(('%s:client:contextLib:triggerFunction'):format(resource), function(data)
+        -- Possible check if there is some kind of bug abuse or event triggered by Lua executor.
+        if resource ~= GetCurrentResourceName() then return end
+        data.method()
+    end)
+end

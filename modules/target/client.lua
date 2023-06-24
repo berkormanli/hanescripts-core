@@ -2,7 +2,7 @@
 local GetItemLabel = Framework.GetItemLabel
 local GetItemDescription = Framework.GetItemDescription
 
-targetLib = {}
+core.targetLib = {}
 
 ----------------------------
 -- [[ TARGET FUNCTIONS ]] --
@@ -13,7 +13,7 @@ targetLib = {}
 local function getIngredients(itemName)
     local shouldCrafted, ingredients = false, nil
     if core.config then
-        for _, categoryValue in pairs(core.config) do
+        for _, categoryValue in pairs(core.config.Menu) do
             if categoryValue.items[itemName] then
                 if categoryValue.items[itemName].ingredients then
                     shouldCrafted = true
@@ -73,11 +73,11 @@ end
 ---@field onSelect fun()
 
 if Config.TargetScript == 'ox_target' then
-
+    if GetResourceState('ox_target') ~= 'started' then error('Target script is set to ox_target in config.lua! ox_target resource should be started!') return end
     --- func desc
     ---@param self any
     ---@param sharedOptions sharedTargetOption[]
-    targetLib.createTargetOptions = function(self, sharedOptions)
+    core.targetLib.createTargetOptions = function(self, sharedOptions)
         local options = {}
         for _, option in ipairs(sharedOptions) do
             options[_] = {
@@ -101,7 +101,7 @@ if Config.TargetScript == 'ox_target' then
     ---@param animation any
     ---@param prop any
     ---@param inputCallback any
-    targetLib.createTargetOptionsWithContext = function(self, sharedOptions, name, title, items, animation, prop, inputCallback)
+    core.targetLib.createTargetOptionsWithContext = function(self, sharedOptions, name, title, items, animation, prop, inputCallback)
         local options = {}
         for _, option in ipairs(sharedOptions) do
             options[_] = {
@@ -110,7 +110,7 @@ if Config.TargetScript == 'ox_target' then
                 label = option.label,
                 canInteract = option.canInteract,
                 onSelect = function()
-                    contextLib.showContext({
+                    core.contextLib.showContext({
                         id = name,
                         title = title,
                         options = getItemList(items, animation, prop, inputCallback)
@@ -132,7 +132,7 @@ if Config.TargetScript == 'ox_target' then
     ---@param self any
     ---@param entity number
     ---@param targetOptions oxTargetOptions
-    targetLib.createEntityTargets = function(self, entity, targetOptions)
+    core.targetLib.createEntityTargets = function(self, entity, targetOptions)
         exports.ox_target:addLocalEntity(entity, targetOptions)
     end
 
@@ -140,7 +140,7 @@ if Config.TargetScript == 'ox_target' then
     ---@param self any
     ---@param sharedZoneOption sharedZoneOptions
     ---@param targetOptions oxTargetOptions
-    targetLib.createBoxTargets = function(self, sharedZoneOption, targetOptions)
+    core.targetLib.createBoxTargets = function(self, sharedZoneOption, targetOptions)
         local id = exports.ox_target:addBoxZone({
             coords = sharedZoneOption.coords,
             size = sharedZoneOption.size,
@@ -160,7 +160,7 @@ if Config.TargetScript == 'ox_target' then
     ---@param self any
     ---@param entity number | table
     ---@param targetOptionNames targetOptionName[]
-    targetLib.removeEntityTargets = function(self, entity, targetOptionNames)
+    core.targetLib.removeEntityTargets = function(self, entity, targetOptionNames)
         local optionNames = {}
         for index, value in ipairs(targetOptionNames) do
             optionNames[index] = value.name
@@ -171,7 +171,7 @@ else
     --- func desc
     ---@param self any
     ---@param sharedOptions sharedTargetOption[]
-    targetLib.createTargetOptions = function(self, sharedOptions)
+    core.targetLib.createTargetOptions = function(self, sharedOptions)
         local options = {}
         for _, option in ipairs(sharedOptions) do
             options[_] = {
@@ -194,7 +194,7 @@ else
     ---@param animation any
     ---@param prop any
     ---@param inputCallback any
-    targetLib.createTargetOptionsWithContext = function(self, sharedOptions, name, title, items, animation, prop, inputCallback)
+    core.targetLib.createTargetOptionsWithContext = function(self, sharedOptions, name, title, items, animation, prop, inputCallback)
         local options = {}
         for _, option in ipairs(sharedOptions) do
             options[_] = {
@@ -203,10 +203,10 @@ else
                 label = option.label,
                 canInteract = option.canInteract,
                 action = function()
-                    contextLib.showContext({
+                    core.contextLib.showContext({
                         id = name,
                         title = title,
-                        options = getItemList(items, animation, prop)
+                        options = getItemList(items, animation, prop, inputCallback)
                     })
                 end
             }
@@ -225,7 +225,7 @@ else
     ---@param self any
     ---@param entity number
     ---@param targetOptions qbTargetOptions
-    targetLib.createEntityTargets = function(self, entity, targetOptions)
+    core.targetLib.createEntityTargets = function(self, entity, targetOptions)
         exports['qb-target']:AddTargetEntity(entity, {
             options = targetOptions,
             distance = 2.5
@@ -236,7 +236,7 @@ else
     ---@param self any
     ---@param sharedZoneOption sharedZoneOptions
     ---@param targetOptions qbTargetOptions
-    targetLib.createBoxTargets = function(self, sharedZoneOption, targetOptions)
+    core.targetLib.createBoxTargets = function(self, sharedZoneOption, targetOptions)
         exports['qb-target']:AddBoxZone(sharedZoneOption.name, sharedZoneOption.coords, sharedZoneOption.size.y, sharedZoneOption.size.x, {
             name = sharedZoneOption.name,
             heading = sharedZoneOption.rotation,
@@ -252,7 +252,7 @@ else
     ---@param self any
     ---@param entity number | table
     ---@param targetOptionNames targetOptionName[]
-    targetLib.removeEntityTargets = function(self, entity, targetOptionNames)
+    core.targetLib.removeEntityTargets = function(self, entity, targetOptionNames)
         local optionNames = {}
         for index, value in ipairs(targetOptionNames) do
             optionNames[index] = value.label
@@ -260,3 +260,5 @@ else
         exports['qb-target']:RemoveTargetEntity(entity, optionNames)
     end
 end
+
+return core.targetLib
